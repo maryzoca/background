@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Quadrados Giratórios - VS Code</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: black;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    class Quadrado {
+        constructor() {
+            this.init();
+        }
+
+        init() {
+            this.tamanho = Math.random() * 40 + 40; 
+            this.x = Math.random() * canvas.width;
+            this.y = canvas.height + this.tamanho;
+            this.velocidade = Math.random() * 1.2 + 0.5;
+            this.opacidade = 1.0;
+            this.taxaFade = Math.random() * 0.003 + 0.001;
+            
+            this.angulo = Math.random() * Math.PI * 2; 
+            this.velocidadeRotacao = Math.random() * 0.02 + 0.01; 
+        }
+
+        atualizar() {
+            this.y -= this.velocidade;
+            this.opacidade -= this.taxaFade;
+            this.angulo += this.velocidadeRotacao;
+
+            if (this.opacidade <= 0 || this.y + this.tamanho < 0) {
+                this.init();
+            }
+        }
+
+        desenhar() {
+            ctx.save();
+            ctx.translate(this.x + this.tamanho / 2, this.y + this.tamanho / 2);
+            ctx.rotate(this.angulo);
+            ctx.fillStyle = `rgba(255, 255, 255, ${this.opacidade})`;
+            ctx.fillRect(-this.tamanho / 2, -this.tamanho / 2, this.tamanho, this.tamanho);
+            ctx.restore();
+        }
+    }
+
+    const quadrados = Array.from({ length: 20 }, () => new Quadrado());
+
+    function desenharTextoCentral() {
+        const texto = "BACKGROUND ANIMATION";
+        ctx.fillStyle = "white";
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 2;
+        
+        // Configuração da fonte
+        ctx.font = "bold 50px serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        const x = canvas.width / 2;
+        const y = canvas.height / 2;
+        const larguraTexto = ctx.measureText(texto).width;
+
+        // Desenhar o Texto
+        ctx.fillText(texto, x, y);
+
+        // Linha de cima
+        ctx.beginPath();
+        ctx.moveTo(x - larguraTexto / 2, y - 35);
+        ctx.lineTo(x + larguraTexto / 2, y - 35);
+        ctx.stroke();
+
+        // Linha de baixo
+        ctx.beginPath();
+        ctx.moveTo(x - larguraTexto / 2, y + 25);
+        ctx.lineTo(x + larguraTexto / 2, y + 25);
+        ctx.stroke();
+    }
+
+    function animar() {
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        quadrados.forEach(q => {
+            q.atualizar();
+            q.desenhar();
+        });
+
+        // Desenha o texto por cima dos quadrados
+        desenharTextoCentral();
+
+        requestAnimationFrame(animar);
+    }
+
+    animar();
+</script>
+
+</body>
+</html>
